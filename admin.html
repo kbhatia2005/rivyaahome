@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>Admin Panel – ArtisanCraft</title>
+  <link rel="stylesheet" href="admin.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">ARTISAN<em>craft</em></div>
+    <h2>Admin Panel</h2>
+    <p>Enter your credentials to continue</p>
+    <div class="inp-wrap">
+      <i class="fa-solid fa-user"></i>
+      <input type="text" id="loginUser" placeholder="Username"/>
+    </div>
+    <div class="inp-wrap">
+      <i class="fa-solid fa-lock"></i>
+      <input type="password" id="loginPass" placeholder="Password"/>
+      <i class="fa-solid fa-eye toggle-pass" id="togglePass"></i>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" onclick="doLogin()">Login <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">ARTISAN<em>craft</em></div>
+    <nav class="sb-nav">
+      <button class="sb-item active" data-tab="products" onclick="switchTab(this)">
+        <i class="fa-solid fa-box"></i> Products
+      </button>
+      <button class="sb-item" data-tab="categories" onclick="switchTab(this)">
+        <i class="fa-solid fa-grip"></i> Categories
+      </button>
+      <button class="sb-item" data-tab="settings" onclick="switchTab(this)">
+        <i class="fa-solid fa-gear"></i> Settings
+      </button>
+    </nav>
+    <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="mainContent">
+
+    <!-- Header -->
+    <div class="main-hdr">
+      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <h1 id="tabTitle">Products</h1>
+      <a href="index.html" target="_blank" class="view-site"><i class="fa-solid fa-arrow-up-right-from-square"></i> View Site</a>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div class="tab-pane active" id="tab-products">
+      <div class="tab-top">
+        <div class="stats-row" id="statsRow"></div>
+        <button class="add-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="filterInput" placeholder="Search products…" oninput="renderTable()"/>
+        <select id="filterCat" onchange="renderTable()">
+          <option value="all">All Categories</option>
+          <option value="sarees">Sarees</option>
+          <option value="nails">Nail Art</option>
+          <option value="shirts">Shirts</option>
+          <option value="wall">Wall Hangings</option>
+          <option value="jewellery">Jewellery</option>
+          <option value="hoodies">Hoodies</option>
+          <option value="suits">Suits</option>
+          <option value="accessories">Accessories</option>
+          <option value="bags">Tote Bags</option>
+          <option value="gifting">Gifting</option>
+        </select>
+      </div>
+      <div class="prod-table-wrap">
+        <table class="prod-table">
+          <thead>
+            <tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Original</th><th>Featured</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="prodTableBody"></tbody>
+        </table>
+        <div class="no-data" id="noData" style="display:none">
+          <i class="fa-solid fa-box-open"></i>
+          <p>No products yet. Click "Add Product" to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES TAB -->
+    <div class="tab-pane" id="tab-categories" style="display:none">
+      <h3 class="tab-sub-h">Category Overview</h3>
+      <div class="cat-overview" id="catOverview"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-pane" id="tab-settings" style="display:none">
+      <h3 class="tab-sub-h">Settings</h3>
+      <div class="settings-box">
+        <div class="setting-row">
+          <label>Admin Username</label>
+          <input type="text" id="setUser" placeholder="admin"/>
+        </div>
+        <div class="setting-row">
+          <label>Admin Password</label>
+          <input type="password" id="setPass" placeholder="••••••"/>
+        </div>
+        <div class="setting-row">
+          <label>WhatsApp Number</label>
+          <input type="text" id="setWa" placeholder="919999999999"/>
+        </div>
+        <button class="save-btn" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+        <div class="save-msg" id="saveMsg"></div>
+      </div>
+      <div class="danger-zone">
+        <h4><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h4>
+        <button class="del-all-btn" onclick="deleteAllProducts()">Delete All Products</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="modalTitle">Add Product</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId"/>
+      <div class="form-row">
+        <label>Product Name *</label>
+        <input type="text" id="fName" placeholder="e.g. Handcrafted Saree"/>
+      </div>
+      <div class="form-row">
+        <label>Category *</label>
+        <select id="fCat">
+          <option value="">Select category</option>
+          <option value="sarees">Sarees</option>
+          <option value="nails">Nail Art</option>
+          <option value="shirts">Shirts</option>
+          <option value="wall">Wall Hangings</option>
+          <option value="jewellery">Jewellery</option>
+          <option value="hoodies">Hoodies</option>
+          <option value="suits">Suits</option>
+          <option value="accessories">Accessories</option>
+          <option value="bags">Tote Bags</option>
+          <option value="gifting">Gifting</option>
+        </select>
+      </div>
+      <div class="form-2col">
+        <div class="form-row">
+          <label>Sale Price (₹) *</label>
+          <input type="number" id="fPrice" placeholder="849"/>
+        </div>
+        <div class="form-row">
+          <label>Original Price (₹)</label>
+          <input type="number" id="fOriginal" placeholder="1299"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Product Image URL</label>
+        <input type="text" id="fImage" placeholder="https://…" oninput="previewImg()"/>
+        <div class="img-preview" id="imgPreview"></div>
+      </div>
+      <div class="form-row">
+        <label>Product Page Link (optional)</label>
+        <input type="text" id="fLink" placeholder="product.html?id=…"/>
+      </div>
+      <div class="form-row check-row">
+        <label class="check-label">
+          <input type="checkbox" id="fFeatured" checked/>
+          Show on Featured Products (home page)
+        </label>
+      </div>
+      <div class="form-err" id="formErr"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="submit-btn" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

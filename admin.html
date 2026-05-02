@@ -10,64 +10,84 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ══ LOGIN ══ -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <div class="login-logo">ARTISAN<em>craft</em></div>
     <h2>Admin Panel</h2>
-    <p>Enter your credentials to continue</p>
-    <div class="inp-wrap">
+    <p class="login-sub">Sign in to manage your store</p>
+    <div class="inp-group">
       <i class="fa-solid fa-user"></i>
-      <input type="text" id="loginUser" placeholder="Username"/>
+      <input type="text" id="loginUser" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()"/>
     </div>
-    <div class="inp-wrap">
+    <div class="inp-group">
       <i class="fa-solid fa-lock"></i>
-      <input type="password" id="loginPass" placeholder="Password"/>
-      <i class="fa-solid fa-eye toggle-pass" id="togglePass"></i>
+      <input type="password" id="loginPass" placeholder="Password" id="loginPass" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <i class="fa-solid fa-eye" id="eyeIcon" onclick="togglePwd()" style="cursor:pointer;left:auto;right:14px"></i>
     </div>
     <div class="login-err" id="loginErr"></div>
-    <button class="login-btn" onclick="doLogin()">Login <i class="fa-solid fa-arrow-right"></i></button>
+    <button class="login-btn" onclick="doLogin()">
+      <i class="fa-solid fa-right-to-bracket"></i> Sign In
+    </button>
+    <p class="login-hint">Default: admin / admin123</p>
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
+<!-- ══ DASHBOARD ══ -->
 <div class="dashboard" id="dashboard" style="display:none">
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
-    <div class="sb-logo">ARTISAN<em>craft</em></div>
+    <div class="sb-brand">
+      <div class="sb-logo">ARTISAN<em>craft</em></div>
+      <button class="sb-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
     <nav class="sb-nav">
-      <button class="sb-item active" data-tab="products" onclick="switchTab(this)">
-        <i class="fa-solid fa-box"></i> Products
+      <button class="sb-item active" data-tab="products" onclick="switchTab('products',this)">
+        <i class="fa-solid fa-box"></i><span>Products</span>
       </button>
-      <button class="sb-item" data-tab="categories" onclick="switchTab(this)">
-        <i class="fa-solid fa-grip"></i> Categories
+      <button class="sb-item" data-tab="categories" onclick="switchTab('categories',this)">
+        <i class="fa-solid fa-grip"></i><span>Categories</span>
       </button>
-      <button class="sb-item" data-tab="settings" onclick="switchTab(this)">
-        <i class="fa-solid fa-gear"></i> Settings
+      <button class="sb-item" data-tab="orders" onclick="switchTab('orders',this)">
+        <i class="fa-solid fa-bag-shopping"></i><span>Orders</span>
+      </button>
+      <button class="sb-item" data-tab="settings" onclick="switchTab('settings',this)">
+        <i class="fa-solid fa-gear"></i><span>Settings</span>
       </button>
     </nav>
-    <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    <div class="sb-footer">
+      <a href="index.html" target="_blank" class="sb-site"><i class="fa-solid fa-arrow-up-right-from-square"></i> View Store</a>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
   </aside>
 
-  <!-- Main -->
-  <main class="main" id="mainContent">
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
-    <!-- Header -->
-    <div class="main-hdr">
-      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-      <h1 id="tabTitle">Products</h1>
-      <a href="index.html" target="_blank" class="view-site"><i class="fa-solid fa-arrow-up-right-from-square"></i> View Site</a>
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <button class="menu-btn" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <h1 class="page-title" id="pageTitle">Products</h1>
+      <div class="topbar-right">
+        <a href="index.html" target="_blank" class="site-link"><i class="fa-solid fa-store"></i></a>
+      </div>
     </div>
 
-    <!-- PRODUCTS TAB -->
-    <div class="tab-pane active" id="tab-products">
-      <div class="tab-top">
-        <div class="stats-row" id="statsRow"></div>
-        <button class="add-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
-      </div>
-      <div class="filter-bar">
-        <input type="text" id="filterInput" placeholder="Search products…" oninput="renderTable()"/>
+    <!-- ── PRODUCTS TAB ── -->
+    <div class="tab-pane" id="tab-products">
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow"></div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-group">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="filterInput" placeholder="Search products…" oninput="renderTable()"/>
+        </div>
         <select id="filterCat" onchange="renderTable()">
           <option value="all">All Categories</option>
           <option value="sarees">Sarees</option>
@@ -81,72 +101,112 @@
           <option value="bags">Tote Bags</option>
           <option value="gifting">Gifting</option>
         </select>
+        <button class="add-btn" onclick="openModal()">
+          <i class="fa-solid fa-plus"></i> Add Product
+        </button>
       </div>
-      <div class="prod-table-wrap">
+
+      <!-- Table -->
+      <div class="table-wrap">
         <table class="prod-table">
           <thead>
-            <tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Original</th><th>Featured</th><th>Actions</th></tr>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>MRP</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
           </thead>
-          <tbody id="prodTableBody"></tbody>
+          <tbody id="prodTbody"></tbody>
         </table>
-        <div class="no-data" id="noData" style="display:none">
+        <div class="empty-state" id="emptyState" style="display:none">
           <i class="fa-solid fa-box-open"></i>
-          <p>No products yet. Click "Add Product" to get started.</p>
+          <p>No products found.</p>
+          <button class="add-btn sm" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add First Product</button>
         </div>
       </div>
     </div>
 
-    <!-- CATEGORIES TAB -->
+    <!-- ── CATEGORIES TAB ── -->
     <div class="tab-pane" id="tab-categories" style="display:none">
-      <h3 class="tab-sub-h">Category Overview</h3>
       <div class="cat-overview" id="catOverview"></div>
     </div>
 
-    <!-- SETTINGS TAB -->
+    <!-- ── ORDERS TAB ── -->
+    <div class="tab-pane" id="tab-orders" style="display:none">
+      <div class="orders-info">
+        <div class="orders-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <h3>Orders via WhatsApp</h3>
+        <p>All customer orders are sent directly to your WhatsApp number. You can view and manage them there.</p>
+        <a href="https://wa.me/919999999999" target="_blank" class="wa-open-btn">
+          <i class="fa-brands fa-whatsapp"></i> Open WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ── -->
     <div class="tab-pane" id="tab-settings" style="display:none">
-      <h3 class="tab-sub-h">Settings</h3>
-      <div class="settings-box">
-        <div class="setting-row">
-          <label>Admin Username</label>
-          <input type="text" id="setUser" placeholder="admin"/>
-        </div>
-        <div class="setting-row">
-          <label>Admin Password</label>
-          <input type="password" id="setPass" placeholder="••••••"/>
-        </div>
-        <div class="setting-row">
+      <div class="settings-card">
+        <h3><i class="fa-solid fa-store"></i> Store Settings</h3>
+        <div class="set-row">
           <label>WhatsApp Number</label>
           <input type="text" id="setWa" placeholder="919999999999"/>
+          <small>Include country code, no + sign. e.g. 919999999999</small>
         </div>
-        <button class="save-btn" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
-        <div class="save-msg" id="saveMsg"></div>
+        <div class="set-row">
+          <label>Store Name</label>
+          <input type="text" id="setStoreName" placeholder="ArtisanCraft"/>
+        </div>
       </div>
-      <div class="danger-zone">
-        <h4><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h4>
-        <button class="del-all-btn" onclick="deleteAllProducts()">Delete All Products</button>
+      <div class="settings-card">
+        <h3><i class="fa-solid fa-lock"></i> Change Password</h3>
+        <div class="set-row">
+          <label>New Username</label>
+          <input type="text" id="setUser" placeholder="admin"/>
+        </div>
+        <div class="set-row">
+          <label>New Password</label>
+          <input type="password" id="setPass" placeholder="Leave blank to keep current"/>
+        </div>
+      </div>
+      <button class="save-settings-btn" onclick="saveSettings()">
+        <i class="fa-solid fa-floppy-disk"></i> Save All Settings
+      </button>
+      <div class="save-msg" id="saveMsg"></div>
+
+      <div class="danger-card">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
+        <p>This will permanently delete all products from your store.</p>
+        <button class="danger-btn" onclick="deleteAll()">Delete All Products</button>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- ADD / EDIT MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal">
+<!-- ══ ADD/EDIT MODAL ══ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" id="modal">
     <div class="modal-hdr">
-      <h3 id="modalTitle">Add Product</h3>
-      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="modalTitle"><i class="fa-solid fa-plus"></i> Add Product</h3>
+      <button class="modal-x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
+
     <div class="modal-body">
       <input type="hidden" id="editId"/>
-      <div class="form-row">
-        <label>Product Name *</label>
+
+      <div class="field">
+        <label>Product Name <span class="req">*</span></label>
         <input type="text" id="fName" placeholder="e.g. Handcrafted Saree"/>
       </div>
-      <div class="form-row">
-        <label>Category *</label>
+
+      <div class="field">
+        <label>Category <span class="req">*</span></label>
         <select id="fCat">
-          <option value="">Select category</option>
+          <option value="">Select category…</option>
           <option value="sarees">Sarees</option>
           <option value="nails">Nail Art</option>
           <option value="shirts">Shirts</option>
@@ -159,42 +219,72 @@
           <option value="gifting">Gifting</option>
         </select>
       </div>
-      <div class="form-2col">
-        <div class="form-row">
-          <label>Sale Price (₹) *</label>
-          <input type="number" id="fPrice" placeholder="849"/>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Sale Price (₹) <span class="req">*</span></label>
+          <input type="number" id="fPrice" placeholder="849" min="0"/>
         </div>
-        <div class="form-row">
-          <label>Original Price (₹)</label>
-          <input type="number" id="fOriginal" placeholder="1299"/>
+        <div class="field">
+          <label>Original / MRP (₹)</label>
+          <input type="number" id="fOriginal" placeholder="1299" min="0"/>
         </div>
       </div>
-      <div class="form-row">
+
+      <div class="field">
         <label>Product Image URL</label>
-        <input type="text" id="fImage" placeholder="https://…" oninput="previewImg()"/>
-        <div class="img-preview" id="imgPreview"></div>
+        <div class="img-input-row">
+          <input type="text" id="fImage" placeholder="https://example.com/image.jpg" oninput="previewImg(this.value)"/>
+          <button class="preview-btn" onclick="previewImg(document.getElementById('fImage').value)">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div class="img-preview-wrap" id="imgPreviewWrap" style="display:none">
+          <img id="imgPreview" src="" alt="Preview"/>
+          <button class="rm-img" onclick="clearImg()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
       </div>
-      <div class="form-row">
-        <label>Product Page Link (optional)</label>
-        <input type="text" id="fLink" placeholder="product.html?id=…"/>
+
+      <div class="field">
+        <label>Product Page Link <span class="opt">(optional)</span></label>
+        <input type="text" id="fLink" placeholder="product.html or https://…"/>
+        <small>When customer clicks the product or cart item, they'll go here.</small>
       </div>
-      <div class="form-row check-row">
+
+      <div class="field check-field">
         <label class="check-label">
           <input type="checkbox" id="fFeatured" checked/>
-          Show on Featured Products (home page)
+          <span class="check-box"></span>
+          Show in Featured Products on home page
         </label>
       </div>
+
       <div class="form-err" id="formErr"></div>
     </div>
+
     <div class="modal-foot">
       <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-      <button class="submit-btn" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+      <button class="save-btn" onclick="saveProduct()">
+        <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnTxt">Save Product</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DIALOG ══ -->
+<div class="confirm-backdrop" id="confirmBackdrop">
+  <div class="confirm-box">
+    <i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:#e05a0a;margin-bottom:10px"></i>
+    <p id="confirmMsg">Are you sure?</p>
+    <div class="confirm-btns">
+      <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
+      <button class="danger-btn sm" id="confirmOkBtn">Delete</button>
     </div>
   </div>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="admin-toast" id="adminToast"></div>
 
 <script src="admin.js"></script>
 </body>

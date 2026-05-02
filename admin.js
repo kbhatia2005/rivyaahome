@@ -394,7 +394,7 @@ function loadSettings() {
   const ww = document.getElementById('setWa');
   const wn = document.getElementById('setStoreName');
   if (wu) wu.value = s.username || '';
-  if (ww) ww.value = s.waNumber || '919999999999';
+  if (ww) ww.value = s.waNumber || '916239446372';
   if (wn) wn.value = s.storeName || 'ArtisanCraft';
 }
 

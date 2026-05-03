@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Artisan Home – All Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --cream: #faf6f0;
+      --warm-white: #f5ede0;
+      --gold: #c9a97e;
+      --gold-dark: #a67c52;
+      --brown: #8b5e3c;
+      --brown-dark: #5a3020;
+      --text: #2a1f14;
+      --text-mid: #6b5040;
+      --text-light: #a08060;
+      --border: #e2d5c3;
+      --whatsapp: #25d366;
+      --radius: 14px;
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--cream); color: var(--text); overflow-x: hidden; }
+
+    /* ===== ANNOUNCEMENT BAR ===== */
+    .announcement-bar {
+      background: linear-gradient(90deg, var(--brown-dark), var(--brown), var(--gold-dark), var(--brown));
+      background-size: 400% 100%;
+      animation: gradShift 8s linear infinite;
+      color: #fff;
+      overflow: hidden;
+      height: 40px;
+      display: flex;
+      align-items: center;
+    }
+    @keyframes gradShift { 0% { background-position: 0% 50%; } 100% { background-position: 400% 50%; } }
+    .ticker-wrapper { overflow: hidden; width: 100%; }
+    .ticker-track { display: flex; gap: 0; white-space: nowrap; animation: ticker 28s linear infinite; }
+    .ticker-track span { font-size: 12.5px; font-weight: 500; letter-spacing: 0.06em; padding: 0 48px; flex-shrink: 0; text-transform: uppercase; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* ===== HEADER ===== */
+    .header { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(42,31,20,0.06); }
+    .header-inner { max-width: 1320px; margin: 0 auto; padding: 0 32px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .logo img { height: 44px; object-fit: contain; cursor: pointer; }
+    .top-nav { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+    .top-nav a { font-size: 12.5px; font-weight: 500; color: var(--text-mid); text-decoration: none; padding: 6px 12px; border-radius: 30px; letter-spacing: 0.04em; text-transform: uppercase; transition: all 0.2s; }
+    .top-nav a:hover, .top-nav a.active { background: var(--warm-white); color: var(--brown); }
+    .header-icons { display: flex; align-items: center; gap: 20px; font-size: 18px; color: var(--text); }
+    .header-icons i { cursor: pointer; transition: color 0.2s; }
+    .header-icons i:hover { color: var(--gold); }
+    .cart-icon { position: relative; cursor: pointer; }
+    .cart-count { position: absolute; top: -8px; right: -8px; background: var(--brown); color: #fff; font-size: 10px; font-family: var(--font-body); font-weight: 600; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+    .cart-count.bump { animation: bump 0.35s ease; }
+    @keyframes bump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
+
+    /* ===== CART DROPDOWN ===== */
+    .cart-dropdown { position: absolute; top: 54px; right: 0; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); width: 320px; box-shadow: 0 12px 40px rgba(42,31,20,0.15); z-index: 200; display: none; overflow: hidden; }
+    .cart-dropdown.open { display: block; }
+    .cart-drop-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .cart-drop-header span { color: var(--text-light); font-size: 12px; font-weight: 400; cursor: pointer; }
+    .cart-drop-header span:hover { color: var(--brown); }
+    .cart-items-list { max-height: 280px; overflow-y: auto; }
+    .cart-item-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+    .cart-item-row img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; background: var(--warm-white); }
+    .cart-item-info { flex: 1; }
+    .cart-item-info p { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+    .cart-item-info small { font-size: 12px; color: var(--text-light); }
+    .cart-item-remove { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 14px; padding: 4px; transition: color 0.2s; }
+    .cart-item-remove:hover { color: #d4450a; }
+    .cart-drop-footer { padding: 16px 20px; }
+    .cart-total-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .cart-total-row span:last-child { color: var(--brown-dark); }
+    .btn-checkout { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--brown-dark), var(--brown)); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+    .btn-checkout:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(90,48,32,0.35); }
+    .cart-empty { padding: 32px 20px; text-align: center; color: var(--text-light); font-size: 14px; }
+
+    /* ===== HERO STRIP ===== */
+    .hero-strip { background: linear-gradient(135deg, var(--warm-white) 0%, #ede6da 100%); padding: 48px 32px 40px; text-align: center; border-bottom: 1px solid var(--border); }
+    .hero-strip h1 { font-family: var(--font-display); font-size: 52px; font-weight: 400; font-style: italic; color: var(--text); margin-bottom: 10px; }
+    .hero-strip p { font-size: 15px; color: var(--text-mid); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+    .hero-divider { width: 64px; height: 2px; background: var(--gold); margin: 16px auto 0; border-radius: 2px; }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar { max-width: 1320px; margin: 0 auto; padding: 28px 32px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 20px; border-radius: 30px; border: 1.5px solid var(--border); background: #fff; color: var(--text-mid); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
+    .filter-btn:hover { border-color: var(--gold); color: var(--brown); }
+    .filter-btn.active { background: var(--brown); color: #fff; border-color: var(--brown); }
+
+    /* ===== PRODUCTS GRID ===== */
+    .products-section { max-width: 1320px; margin: 0 auto; padding: 32px 32px 80px; }
+    .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+
+    /* ===== PRODUCT CARD ===== */
+    .product-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; display: flex; flex-direction: column; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(42,31,20,0.12); }
+
+    /* IMAGE AREA */
+    .card-image-area { position: relative; background: var(--warm-white); }
+    .card-main-img { width: 100%; aspect-ratio: 3/3.5; object-fit: cover; display: block; transition: opacity 0.3s ease; }
+    .card-badge { position: absolute; top: 12px; left: 12px; background: var(--brown); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+    .card-badge.sale { background: #d4450a; }
+    .card-badge.new { background: #2a6b3a; }
+    .card-wishlist { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--text-light); transition: all 0.2s; }
+    .card-wishlist:hover, .card-wishlist.active { color: #d4450a; background: #fff; }
+
+    /* THUMBNAIL ROW */
+    .card-thumbs { display: flex; gap: 6px; padding: 10px 12px; background: var(--warm-white); border-top: 1px solid var(--border); justify-content: center; }
+    .card-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 7px; border: 2px solid transparent; cursor: pointer; opacity: 0.65; transition: all 0.2s; flex-shrink: 0; }
+    .card-thumb:hover { opacity: 1; border-color: var(--gold); }
+    .card-thumb.active { border-color: var(--brown); opacity: 1; }
+
+    /* PRODUCT INFO */
+    .card-body { padding: 18px 18px 20px; flex: 1; display: flex; flex-direction: column; }
+    .card-category { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold-dark); font-weight: 600; margin-bottom: 6px; }
+    .card-name { font-family: var(--font-display); font-size: 18px; font-weight: 400; font-style: italic; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+    .card-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+    .card-stars { color: #e6a817; font-size: 13px; }
+    .card-rating-count { font-size: 12px; color: var(--text-light); }
+    .card-price { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .card-price-orig { font-size: 13px; color: var(--text-light); text-decoration: line-through; }
+    .card-price-sale { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--brown-dark); }
+    .card-discount { background: #fff0e6; color: #d4450a; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+
+    /* SIZE SELECTOR */
+    .card-sizes { display: flex; gap: 5px; margin-bottom: 16px; flex-wrap: wrap; }
+    .size-pill { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: #fff; color: var(--text-mid); font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .size-pill:hover { border-color: var(--gold); color: var(--brown); }
+    .size-pill.active { background: var(--brown-dark); color: #fff; border-color: var(--brown-dark); }
+
+    /* CARD BUTTONS */
+    .card-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+    .btn-add-cart { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--brown-dark), var(--brown)); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s; }
+    .btn-add-cart:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(90,48,32,0.35); }
+    .btn-add-cart.added { background: #2a6b3a; }
+    .card-bottom-row { display: flex; gap: 8px; }
+    .btn-buy-now { flex: 1; padding: 10px; background: #fff; color: var(--brown-dark); border: 1.5px solid var(--brown); border-radius: 10px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .btn-buy-now:hover { background: var(--warm-white); }
+    .btn-customise { flex: 1; padding: 10px; background: var(--whatsapp); color: #fff; border: none; border-radius: 10px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.03em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; transition: all 0.2s; }
+    .btn-customise:hover { background: #1fb855; }
+    .btn-customise i { font-size: 14px; }
+
+    /* ===== TOAST ===== */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--brown-dark); color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 9999; opacity: 0; transition: all 0.35s ease; pointer-events: none; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== FLOATING CUSTOMER CARE ===== */
+    .float-care { position: fixed; right: 24px; bottom: 32px; z-index: 500; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .float-care-main { width: 56px; height: 56px; background: var(--whatsapp); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; cursor: pointer; box-shadow: 0 6px 24px rgba(37,211,102,0.5); border: none; transition: all 0.25s; }
+    .float-care-main:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(37,211,102,0.6); }
+    .float-care-menu { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .float-care-menu.hidden { display: none; }
+    .float-care-item { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 9px 16px 9px 12px; cursor: pointer; box-shadow: 0 4px 16px rgba(42,31,20,0.12); text-decoration: none; color: var(--text); font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
+    .float-care-item:hover { background: var(--warm-white); transform: translateX(-3px); }
+    .float-care-item i { width: 20px; text-align: center; color: var(--brown); font-size: 15px; }
+    .float-tooltip { position: absolute; right: 66px; top: 50%; transform: translateY(-50%); background: var(--brown-dark); color: #fff; font-size: 12px; padding: 5px 12px; border-radius: 20px; white-space: nowrap; pointer-events: none; }
+
+    /* ===== WHY US ===== */
+    .why-us { background: var(--warm-white); padding: 72px 32px; border-top: 1px solid var(--border); }
+    .why-inner { max-width: 1100px; margin: 0 auto; }
+    .section-heading { font-family: var(--font-display); font-size: 38px; font-weight: 400; font-style: italic; color: var(--text); text-align: center; margin-bottom: 44px; }
+    .section-heading::after { content: ''; display: block; width: 56px; height: 2px; background: var(--gold); margin: 14px auto 0; border-radius: 2px; }
+    .why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+    .why-card { background: #fff; border-radius: var(--radius); padding: 30px 24px; text-align: center; border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s; }
+    .why-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(42,31,20,0.1); }
+    .why-icon { font-size: 32px; color: var(--gold); margin-bottom: 14px; }
+    .why-card h3 { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .why-card p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; }
+
+    /* ===== FOOTER ===== */
+    .footer { background: #1e1209; color: #c8b09a; padding: 72px 32px 0; }
+    .footer-top { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.4fr; gap: 48px; padding-bottom: 56px; border-bottom: 1px solid rgba(201,169,126,0.2); }
+    .footer-logo { margin-bottom: 18px; display: block; height: 48px; }
+    .footer-desc { font-size: 13.5px; line-height: 1.8; color: #a09080; margin-bottom: 24px; max-width: 280px; }
+    .social-icons { display: flex; gap: 12px; }
+    .social-icons a { width: 38px; height: 38px; border: 1px solid rgba(201,169,126,0.35); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 15px; text-decoration: none; transition: all 0.2s; }
+    .social-icons a:hover { background: var(--gold); color: #1e1209; border-color: var(--gold); }
+    .footer-links h4, .footer-contact h4 { font-family: var(--font-display); font-size: 18px; color: #fff; font-weight: 400; margin-bottom: 20px; letter-spacing: 0.04em; }
+    .footer-links { display: flex; flex-direction: column; gap: 0; }
+    .footer-links a { font-size: 13.5px; color: #a09080; text-decoration: none; padding: 6px 0; transition: color 0.2s, padding-left 0.2s; }
+    .footer-links a:hover { color: var(--gold); padding-left: 6px; }
+    .footer-contact p { font-size: 13.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: #a09080; }
+    .footer-contact p i { color: var(--gold); font-size: 15px; width: 18px; }
+    .payment-icons { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+    .payment-icons img { height: 28px; border-radius: 5px; border: 1px solid rgba(201,169,126,0.2); background: rgba(255,255,255,0.08); }
+    .footer-bottom { max-width: 1320px; margin: 0 auto; padding: 22px 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #706050; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1100px) {
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 700px) {
+      .header-inner { padding: 0 16px; }
+      .top-nav { display: none; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .hero-strip h1 { font-size: 32px; }
+      .products-section { padding: 24px 14px 60px; }
+      .card-name { font-size: 15px; }
+      .card-thumbs { padding: 8px; gap: 5px; }
+      .card-thumb { width: 36px; height: 36px; }
+      .footer-top { grid-template-columns: 1fr; }
+      .why-grid { grid-template-columns: 1fr 1fr; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .card-body { padding: 12px 12px 14px; }
+      .card-name { font-size: 14px; }
+      .card-price-sale { font-size: 20px; }
+      .btn-add-cart { font-size: 12px; padding: 10px; }
+      .card-bottom-row { flex-direction: column; }
+      .filter-bar { padding: 20px 14px 0; }
+      .hero-strip { padding: 32px 16px 28px; }
+      .hero-strip h1 { font-size: 26px; }
+      .footer { padding: 48px 16px 0; }
+      .footer-top { grid-template-columns: 1fr; gap: 28px; }
+      .why-us { padding: 48px 14px; }
+      .why-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+      .why-card { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar">
+  <div class="ticker-wrapper">
+    <div class="ticker-track">
+      <span>✦ Free Shipping on Orders Above ₹999</span>
+      <span>✦ COD Available Pan India</span>
+      <span>✦ 100% Handcrafted Products</span>
+      <span>✦ Easy 7-Day Returns</span>
+      <span>✦ Secure Payments via UPI, Cards & Net Banking</span>
+      <span>✦ Free Shipping on Orders Above ₹999</span>
+      <span>✦ COD Available Pan India</span>
+      <span>✦ 100% Handcrafted Products</span>
+      <span>✦ Easy 7-Day Returns</span>
+      <span>✦ Secure Payments via UPI, Cards & Net Banking</span>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <img src="https://placehold.co/140x48/1a1a1a/c9a97e?text=ARTISAN+HOME&font=playfair" alt="Artisan Home Logo" />
+    </div>
+    <nav class="top-nav">
+      <a href="#" class="active">All Products</a>
+      <a href="#">Rings</a>
+      <a href="#">Wall Hanging</a>
+      <a href="#">Macramé</a>
+      <a href="#">Candles</a>
+      <a href="#">Gifts</a>
+      <a href="#">New Arrivals</a>
+      <a href="#">Sale</a>
+    </nav>
+    <div class="header-icons">
+      <i class="fa-regular fa-heart"></i>
+      <i class="fa-regular fa-user"></i>
+      <div class="cart-icon" id="cartIconWrap">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span class="cart-count" id="cartCount">0</span>
+        <!-- CART DROPDOWN -->
+        <div class="cart-dropdown" id="cartDropdown">
+          <div class="cart-drop-header">
+            My Bag
+            <span onclick="clearCart()">Clear All</span>
+          </div>
+          <div class="cart-items-list" id="cartItemsList">
+            <div class="cart-empty">Your bag is empty.</div>
+          </div>
+          <div class="cart-drop-footer" id="cartFooter" style="display:none">
+            <div class="cart-total-row">
+              <span>Total</span>
+              <span id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-checkout" onclick="goCheckout()">Proceed to Checkout →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO STRIP -->
+<div class="hero-strip">
+  <h1>Our Collection</h1>
+  <p>Each piece is a story — handcrafted with love, dyed with nature, and made to make your space feel like home.</p>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+  <button class="filter-btn" onclick="filterProducts('jewellery', this)">Jewellery</button>
+  <button class="filter-btn" onclick="filterProducts('macrame', this)">Macramé</button>
+  <button class="filter-btn" onclick="filterProducts('candles', this)">Candles</button>
+  <button class="filter-btn" onclick="filterProducts('decor', this)">Decor</button>
+</div>
+
+<!-- PRODUCTS SECTION -->
+<section class="products-section">
+  <div class="products-grid" id="productsGrid">
+
+    <!-- PRODUCT 1 -->
+    <div class="product-card" data-category="jewellery">
+      <div class="card-image-area">
+        <img class="card-main-img" id="img-p1" src="https://placehold.co/400x470/f5ede0/8b5e3c?text=Ring+View+1&font=playfair" alt="Bohemian Ring" />
+        <span class="card-badge">Bestseller</span>
+        <button class="card-wishlist" onclick="toggleWishlist(this)"><i class="fa-regular fa-heart"></i></button>
+        <div class="card-thumbs">
+          <img class="card-thumb active" src="https://placehold.co/80x80/f5ede0/8b5e3c?text=1" onclick="switchImg('img-p1', 'https://placehold.co/400x470/f5ede0/8b5e3c?text=Ring+View+1&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/e8ddd0/6b3a2a?text=2" onclick="switchImg('img-p1', 'https://placehold.co/400x470/e8ddd0/6b3a2a?text=Ring+View+2&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/d4c5b0/5a3020?text=3" onclick="switchImg('img-p1', 'https://placehold.co/400x470/d4c5b0/5a3020?text=Ring+View+3&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/efe8de/9b6e4e?text=4" onclick="switchImg('img-p1', 'https://placehold.co/400x470/efe8de/9b6e4e?text=Ring+View+4&font=playfair', this)" />
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-category">Handcrafted Jewellery</p>
+        <h3 class="card-name">Bohemian Macramé Ring – Terracotta</h3>
+        <div class="card-rating">
+          <span class="card-stars">★★★★★</span>
+          <span class="card-rating-count">(128)</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-orig">₹1,299</span>
+          <span class="card-price-sale">₹849</span>
+          <span class="card-discount">35% OFF</span>
+        </div>
+        <div class="card-sizes">
+          <button class="size-pill active" onclick="selectSize(this)">XS</button>
+          <button class="size-pill" onclick="selectSize(this)">S</button>
+          <button class="size-pill" onclick="selectSize(this)">M</button>
+          <button class="size-pill" onclick="selectSize(this)">L</button>
+        </div>
+        <div class="card-actions">
+          <button class="btn-add-cart" onclick="addToCart(this, 'Bohemian Macramé Ring', 849, 'https://placehold.co/80x80/f5ede0/8b5e3c?text=Ring')">
+            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+          </button>
+          <div class="card-bottom-row">
+            <a href="YOUR_BUY_PAGE_LINK_HERE" class="btn-buy-now">Buy Now</a>
+            <a href="https://wa.me/919999999999?text=Hi!%20I%20want%20to%20customise%20the%20Bohemian%20Ring" class="btn-customise" target="_blank">
+              <i class="fa-brands fa-whatsapp"></i> Customise
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT 2 -->
+    <div class="product-card" data-category="macrame">
+      <div class="card-image-area">
+        <img class="card-main-img" id="img-p2" src="https://placehold.co/400x470/e8ddd0/5a3020?text=Wall+Hanging+1&font=playfair" alt="Boho Wall Hanging" />
+        <span class="card-badge new">New</span>
+        <button class="card-wishlist" onclick="toggleWishlist(this)"><i class="fa-regular fa-heart"></i></button>
+        <div class="card-thumbs">
+          <img class="card-thumb active" src="https://placehold.co/80x80/e8ddd0/5a3020?text=1" onclick="switchImg('img-p2', 'https://placehold.co/400x470/e8ddd0/5a3020?text=Wall+Hanging+1&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/d4c5b0/3a2010?text=2" onclick="switchImg('img-p2', 'https://placehold.co/400x470/d4c5b0/3a2010?text=Wall+Hanging+2&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/f0e6d6/6b3a2a?text=3" onclick="switchImg('img-p2', 'https://placehold.co/400x470/f0e6d6/6b3a2a?text=Wall+Hanging+3&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/c8b89a/4a2010?text=4" onclick="switchImg('img-p2', 'https://placehold.co/400x470/c8b89a/4a2010?text=Wall+Hanging+4&font=playfair', this)" />
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-category">Macramé Wall Art</p>
+        <h3 class="card-name">Boho Wall Hanging – Sage & Ivory</h3>
+        <div class="card-rating">
+          <span class="card-stars">★★★★★</span>
+          <span class="card-rating-count">(94)</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-orig">₹1,599</span>
+          <span class="card-price-sale">₹999</span>
+          <span class="card-discount">37% OFF</span>
+        </div>
+        <div class="card-sizes">
+          <button class="size-pill active" onclick="selectSize(this)">Small</button>
+          <button class="size-pill" onclick="selectSize(this)">Medium</button>
+          <button class="size-pill" onclick="selectSize(this)">Large</button>
+        </div>
+        <div class="card-actions">
+          <button class="btn-add-cart" onclick="addToCart(this, 'Boho Wall Hanging', 999, 'https://placehold.co/80x80/e8ddd0/5a3020?text=Wall')">
+            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+          </button>
+          <div class="card-bottom-row">
+            <a href="YOUR_BUY_PAGE_LINK_HERE" class="btn-buy-now">Buy Now</a>
+            <a href="https://wa.me/919999999999?text=Hi!%20I%20want%20to%20customise%20the%20Wall%20Hanging" class="btn-customise" target="_blank">
+              <i class="fa-brands fa-whatsapp"></i> Customise
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT 3 -->
+    <div class="product-card" data-category="candles">
+      <div class="card-image-area">
+        <img class="card-main-img" id="img-p3" src="https://placehold.co/400x470/ede0d0/5a3020?text=Candle+View+1&font=playfair" alt="Candle Holder" />
+        <button class="card-wishlist" onclick="toggleWishlist(this)"><i class="fa-regular fa-heart"></i></button>
+        <div class="card-thumbs">
+          <img class="card-thumb active" src="https://placehold.co/80x80/ede0d0/5a3020?text=1" onclick="switchImg('img-p3', 'https://placehold.co/400x470/ede0d0/5a3020?text=Candle+View+1&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/d4bfaa/4a2010?text=2" onclick="switchImg('img-p3', 'https://placehold.co/400x470/d4bfaa/4a2010?text=Candle+View+2&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/c8b89a/3a1a08?text=3" onclick="switchImg('img-p3', 'https://placehold.co/400x470/c8b89a/3a1a08?text=Candle+View+3&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/f5ede0/8b5e3c?text=4" onclick="switchImg('img-p3', 'https://placehold.co/400x470/f5ede0/8b5e3c?text=Candle+View+4&font=playfair', this)" />
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-category">Home Decor</p>
+        <h3 class="card-name">Handpainted Terracotta Candle Holder</h3>
+        <div class="card-rating">
+          <span class="card-stars">★★★★☆</span>
+          <span class="card-rating-count">(67)</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-orig">₹899</span>
+          <span class="card-price-sale">₹649</span>
+          <span class="card-discount">27% OFF</span>
+        </div>
+        <div class="card-sizes">
+          <button class="size-pill active" onclick="selectSize(this)">Single</button>
+          <button class="size-pill" onclick="selectSize(this)">Set of 2</button>
+          <button class="size-pill" onclick="selectSize(this)">Set of 3</button>
+        </div>
+        <div class="card-actions">
+          <button class="btn-add-cart" onclick="addToCart(this, 'Terracotta Candle Holder', 649, 'https://placehold.co/80x80/ede0d0/5a3020?text=Candle')">
+            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+          </button>
+          <div class="card-bottom-row">
+            <a href="YOUR_BUY_PAGE_LINK_HERE" class="btn-buy-now">Buy Now</a>
+            <a href="https://wa.me/919999999999?text=Hi!%20I%20want%20to%20customise%20the%20Candle%20Holder" class="btn-customise" target="_blank">
+              <i class="fa-brands fa-whatsapp"></i> Customise
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT 4 -->
+    <div class="product-card" data-category="decor">
+      <div class="card-image-area">
+        <img class="card-main-img" id="img-p4" src="https://placehold.co/400x470/ddd0c0/4a2010?text=Gift+Set+1&font=playfair" alt="Gift Set" />
+        <span class="card-badge sale">Sale</span>
+        <button class="card-wishlist" onclick="toggleWishlist(this)"><i class="fa-regular fa-heart"></i></button>
+        <div class="card-thumbs">
+          <img class="card-thumb active" src="https://placehold.co/80x80/ddd0c0/4a2010?text=1" onclick="switchImg('img-p4', 'https://placehold.co/400x470/ddd0c0/4a2010?text=Gift+Set+1&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/c8b89a/3a1a08?text=2" onclick="switchImg('img-p4', 'https://placehold.co/400x470/c8b89a/3a1a08?text=Gift+Set+2&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/f0e6d6/6b3a2a?text=3" onclick="switchImg('img-p4', 'https://placehold.co/400x470/f0e6d6/6b3a2a?text=Gift+Set+3&font=playfair', this)" />
+          <img class="card-thumb" src="https://placehold.co/80x80/e8ddd0/8b5e3c?text=4" onclick="switchImg('img-p4', 'https://placehold.co/400x470/e8ddd0/8b5e3c?text=Gift+Set+4&font=playfair', this)" />
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-category">Gift Sets</p>
+        <h3 class="card-name">Macramé Gift Set – Earthy Tones</h3>
+        <div class="card-rating">
+          <span class="card-stars">★★★★★</span>
+          <span class="card-rating-count">(52)</span>
+        </div>
+        <div class="card-price">
+          <span class="card-price-orig">₹2,299</span>
+          <span class="card-price-sale">₹1,499</span>
+          <span class="card-discount">34% OFF</span>
+        </div>
+        <div class="card-sizes">
+          <button class="size-pill active" onclick="selectSize(this)">Standard</button>
+          <button class="size-pill" onclick="selectSize(this)">Premium</button>
+        </div>
+        <div class="card-actions">
+          <button class="btn-add-cart" onclick="addToCart(this, 'Macramé Gift Set', 1499, 'https://placehold.co/80x80/ddd0c0/4a2010?text=Gift')">
+            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+          </button>
+          <div class="card-bottom-row">
+            <a href="YOUR_BUY_PAGE_LINK_HERE" class="btn-buy-now">Buy Now</a>
+            <a href="https://wa.me/919999999999?text=Hi!%20I%20want%20to%20customise%20the%20Gift%20Set" class="btn-customise" target="_blank">
+              <i class="fa-brands fa-whatsapp"></i> Customise
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY US -->
+<div class="why-us">
+  <div class="why-inner">
+    <h2 class="section-heading">Why Artisan Home?</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon"><i class="fa-solid fa-hands"></i></div>
+        <h3>100% Handcrafted</h3>
+        <p>Every piece made by skilled artisans in India. No two items are exactly alike — that's the beauty of handcraft.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon"><i class="fa-solid fa-leaf"></i></div>
+        <h3>Eco-Friendly</h3>
+        <p>Natural fibres, organic dyes, and sustainable packaging. Good for your home, good for the planet.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon"><i class="fa-solid fa-truck"></i></div>
+        <h3>Pan India Delivery</h3>
+        <p>Free shipping above ₹999. Delivered in 5–7 business days with tracking updates at every step.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <h3>Easy Returns</h3>
+        <p>7-day hassle-free return policy. Not happy? We'll sort it out. Your satisfaction is our promise.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <img src="https://placehold.co/160x52/fff/c9a97e?text=ARTISAN+HOME&font=playfair" alt="Logo" class="footer-logo"/>
+      <p class="footer-desc">We celebrate the art of slow living through handcrafted decor, jewellery, and gifts — each piece made with love and intention in India.</p>
+      <div class="social-icons">
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <h4>Information</h4>
+      <a href="#">About Us</a>
+      <a href="#">Our Story</a>
+      <a href="#">Sustainability</a>
+      <a href="#">Blog</a>
+      <a href="#">Press & Media</a>
+    </div>
+    <div class="footer-links">
+      <h4>Customer Care</h4>
+      <a href="#">Track Your Order</a>
+      <a href="#">Return & Refund Policy</a>
+      <a href="#">Shipping Policy</a>
+      <a href="#">FAQs</a>
+      <a href="#">Bulk / Corporate Orders</a>
+    </div>
+    <div class="footer-links">
+      <h4>Policies</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms & Conditions</a>
+      <a href="#">Cookie Policy</a>
+      <a href="#">Disclaimer</a>
+    </div>
+    <div class="footer-contact">
+      <h4>Contact Us</h4>
+      <p><i class="fa-solid fa-envelope"></i> support@artisanhome.in</p>
+      <p><i class="fa-brands fa-whatsapp"></i> +91 99999 99999</p>
+      <p><i class="fa-solid fa-clock"></i> Mon–Sat, 10 AM – 7 PM</p>
+      <div class="payment-icons">
+        <img src="https://placehold.co/48x28/ffffff/888?text=UPI" alt="UPI"/>
+        <img src="https://placehold.co/48x28/ffffff/888?text=VISA" alt="Visa"/>
+        <img src="https://placehold.co/48x28/ffffff/888?text=MC" alt="Mastercard"/>
+        <img src="https://placehold.co/48x28/ffffff/888?text=COD" alt="COD"/>
+        <img src="https://placehold.co/48x28/ffffff/888?text=GPay" alt="GPay"/>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Artisan Home. All rights reserved. Made with ♥ in India.</p>
+    <p>Designed for dreamers, crafted for you.</p>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Added to bag!</span></div>
+
+<!-- FLOATING CUSTOMER CARE -->
+<div class="float-care">
+  <div class="float-care-menu hidden" id="careMenu">
+    <a href="https://wa.me/919999999999" class="float-care-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+    </a>
+    <a href="mailto:support@artisanhome.in" class="float-care-item">
+      <i class="fa-solid fa-envelope"></i> Email Us
+    </a>
+    <a href="tel:+919999999999" class="float-care-item">
+      <i class="fa-solid fa-phone"></i> Call Us
+    </a>
+    <a href="#" class="float-care-item">
+      <i class="fa-solid fa-circle-question"></i> FAQs
+    </a>
+  </div>
+  <button class="float-care-main" id="careBtn" onclick="toggleCare()">
+    <i class="fa-solid fa-headset" id="careIcon"></i>
+  </button>
+</div>
+
+<script>
+  // ===== CART STATE =====
+  let cart = [];
+  let cartOpen = false;
+
+  // ===== TOGGLE CART DROPDOWN =====
+  document.getElementById('cartIconWrap').addEventListener('click', function(e) {
+    cartOpen = !cartOpen;
+    document.getElementById('cartDropdown').classList.toggle('open', cartOpen);
+  });
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('cartIconWrap').contains(e.target)) {
+      cartOpen = false;
+      document.getElementById('cartDropdown').classList.remove('open');
+    }
+  });
+
+  // ===== ADD TO CART =====
+  function addToCart(btn, name, price, img) {
+    const existing = cart.find(i => i.name === name);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ name, price, img, qty: 1 });
+    }
+    updateCartUI();
+
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Added!';
+    btn.classList.add('added');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Add to Cart';
+      btn.classList.remove('added');
+    }, 1800);
+
+    const count = document.getElementById('cartCount');
+    count.classList.remove('bump');
+    void count.offsetWidth;
+    count.classList.add('bump');
+
+    showToast(name + ' added to your bag!');
+  }
+
+  function updateCartUI() {
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cartCount').textContent = totalQty;
+    document.getElementById('cartTotal').textContent = '₹' + total.toLocaleString('en-IN');
+
+    const list = document.getElementById('cartItemsList');
+    const footer = document.getElementById('cartFooter');
+
+    if (cart.length === 0) {
+      list.innerHTML = '<div class="cart-empty">Your bag is empty.</div>';
+      footer.style.display = 'none';
+    } else {
+      footer.style.display = 'block';
+      list.innerHTML = cart.map((item, idx) => `
+        <div class="cart-item-row">
+          <img src="${item.img}" alt="${item.name}" />
+          <div class="cart-item-info">
+            <p>${item.name}</p>
+            <small>₹${item.price.toLocaleString('en-IN')} × ${item.qty}</small>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart(${idx})"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      `).join('');
+    }
+  }
+
+  function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    updateCartUI();
+  }
+
+  function clearCart() {
+    cart = [];
+    updateCartUI();
+  }
+
+  // ===== CHECKOUT - Replace this URL with your checkout page =====
+  function goCheckout() {
+    window.location.href = 'YOUR_CHECKOUT_PAGE_LINK_HERE';
+  }
+
+  // ===== TOAST =====
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ===== IMAGE SWITCH =====
+  function switchImg(imgId, src, thumbEl) {
+    const img = document.getElementById(imgId);
+    img.style.opacity = '0';
+    setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 200);
+    const row = thumbEl.closest('.card-thumbs');
+    row.querySelectorAll('.card-thumb').forEach(t => t.classList.remove('active'));
+    thumbEl.classList.add('active');
+  }
+
+  // ===== SIZE SELECT =====
+  function selectSize(btn) {
+    const group = btn.closest('.card-sizes');
+    group.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ===== WISHLIST =====
+  function toggleWishlist(btn) {
+    btn.classList.toggle('active');
+    const icon = btn.querySelector('i');
+    if (btn.classList.contains('active')) {
+      icon.className = 'fa-solid fa-heart';
+      showToast('Added to wishlist!');
+    } else {
+      icon.className = 'fa-regular fa-heart';
+    }
+  }
+
+  // ===== FILTER =====
+  function filterProducts(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.product-card').forEach(card => {
+      if (cat === 'all' || card.dataset.category === cat) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // ===== FLOATING CARE BUTTON =====
+  let careOpen = false;
+  function toggleCare() {
+    careOpen = !careOpen;
+    document.getElementById('careMenu').classList.toggle('hidden', !careOpen);
+    document.getElementById('careIcon').className = careOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-headset';
+  }
+</script>
+</body>
+</html>

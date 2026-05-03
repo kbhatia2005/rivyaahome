@@ -2,24 +2,38 @@ const API_URL  = 'https://script.google.com/macros/s/AKfycbzKE_ISsqnLyQKrY9iIKEZ
 const CART_KEY = 'artisancraft_cart';
 
 const CATS = [
-  {key:'sarees',label:'Sarees'},{key:'nails',label:'Nail Art'},
-  {key:'shirts',label:'Shirts'},{key:'wall',label:'Wall Hangings'},
-  {key:'jewellery',label:'Jewellery'},{key:'hoodies',label:'Hoodies'},
-  {key:'suits',label:'Suits'},{key:'accessories',label:'Accessories'},
-  {key:'bags',label:'Tote Bags'},{key:'gifting',label:'Gifting'}
+  {key:'sarees',      label:'Wall Hanging'},
+  {key:'nails',       label:'Nail Art'},
+  {key:'shirts',      label:'Mobile Cover'},
+  {key:'wall',        label:'Hair Clips / Pookie Bags'},
+  {key:'jewellery',   label:'Jewellery'},
+  {key:'hoodies',     label:'Women Styling'},
+  {key:'suits',       label:'Men Styling'},
+  {key:'accessories', label:'Hair Accessories'},
+  {key:'bags',        label:'Bookmarks'},
+  {key:'gifting',     label:'Gifting'}
 ];
 
-const STATIC_SEARCH = [
-  {name:'Handcrafted Saree',cat:'sarees'},{name:'Hand Painted Saree',cat:'sarees'},
-  {name:'Press-On Nails',cat:'nails'},{name:'Bridal Nail Set',cat:'nails'},
-  {name:'Hand Painted Shirt',cat:'shirts'},{name:'Handcrafted Shirt',cat:'shirts'},
-  {name:'Wall Hanging',cat:'wall'},{name:'Wedding Hoops',cat:'jewellery'},
-  {name:'Engagement Ring Platter',cat:'gifting'},{name:'Hand Painted Hoodie',cat:'hoodies'},
-  {name:'Handcrafted Suit',cat:'suits'},{name:'Tote Bag',cat:'bags'},
-  {name:'Hair Accessories',cat:'accessories'},{name:'Bookmark',cat:'gifting'},
-];
+/* ─────────────────────────────────────────────────────────
+   CATEGORY LINKS — Yahan apne links daalo
+   Naye tab mein kholna: window.open(link, '_blank')
+   Same tab mein kholna: window.location.href = link
+   Agar kisi ka link nahi dena, us line ko hata do.
+───────────────────────────────────────────────────────── */
+const CAT_LINKS = {
+  sarees:      'https://AAPKA-WALL-HANGING-LINK.com',
+  nails:       'https://AAPKA-NAILS-LINK.com',
+  shirts:      'https://AAPKA-MOBILE-COVER-LINK.com',
+  wall:        'https://AAPKA-POOKIE-BAGS-LINK.com',
+  jewellery:   'https://AAPKA-JEWELLERY-LINK.com',
+  hoodies:     'https://AAPKA-WOMEN-STYLING-LINK.com',
+  suits:       'https://AAPKA-MEN-STYLING-LINK.com',
+  accessories: 'https://AAPKA-HAIR-ACCESSORIES-LINK.com',
+  bags:        'https://AAPKA-BOOKMARKS-LINK.com',
+  gifting:     'https://AAPKA-GIFTING-LINK.com',
+};
 
-/* ─── JSONP FETCH (works on file:// and any hosting) ─── */
+/* ─── JSONP FETCH ─── */
 let allProducts = [];
 
 function fetchProductsJSONP() {
@@ -180,87 +194,138 @@ function openCart()  { document.getElementById('cartDrawer').classList.add('open
 function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
 
 /* ─── HERO SLIDER ─── */
-let curSlide=0;
-const slidesWrap=document.getElementById('slidesWrap');
-const dotsWrap=document.getElementById('dots');
-const totalSlides=slidesWrap?slidesWrap.querySelectorAll('.slide').length:0;
+let curSlide  = 0;
+const slidesWrap  = document.getElementById('slidesWrap');
+const dotsWrap    = document.getElementById('dots');
+const totalSlides = slidesWrap ? slidesWrap.querySelectorAll('.slide').length : 0;
 let autoTimer;
 
 (function buildDots(){
-  if(!dotsWrap)return;
+  if(!dotsWrap) return;
   for(let i=0;i<totalSlides;i++){
-    const d=document.createElement('button');
-    d.className='dot'+(i===0?' active':'');
-    d.onclick=()=>{goSlide(i);resetAuto();};
+    const d = document.createElement('button');
+    d.className = 'dot'+(i===0?' active':'');
+    d.onclick = ()=>{ goSlide(i); resetAuto(); };
     dotsWrap.appendChild(d);
   }
 })();
 
 function goSlide(n){
-  curSlide=((n%totalSlides)+totalSlides)%totalSlides;
-  if(slidesWrap)slidesWrap.style.transform=`translateX(-${curSlide*100}%)`;
+  curSlide = ((n%totalSlides)+totalSlides)%totalSlides;
+  if(slidesWrap) slidesWrap.style.transform = `translateX(-${curSlide*100}%)`;
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===curSlide));
 }
-function moveSlide(dir){goSlide(curSlide+dir);resetAuto();}
-function resetAuto(){clearInterval(autoTimer);autoTimer=setInterval(()=>goSlide(curSlide+1),4500);}
+function moveSlide(dir){ goSlide(curSlide+dir); resetAuto(); }
+function resetAuto(){ clearInterval(autoTimer); autoTimer=setInterval(()=>goSlide(curSlide+1),4500); }
 resetAuto();
 
 (function(){
-  const hero=document.querySelector('.hero');
-  if(!hero)return;
-  let sx=0;
-  hero.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
-  hero.addEventListener('touchend',e=>{if(Math.abs(sx-e.changedTouches[0].clientX)>40)moveSlide(sx>e.changedTouches[0].clientX?1:-1);},{passive:true});
+  const hero = document.querySelector('.hero');
+  if(!hero) return;
+  let sx = 0;
+  hero.addEventListener('touchstart', e=>sx=e.touches[0].clientX, {passive:true});
+  hero.addEventListener('touchend',   e=>{ if(Math.abs(sx-e.changedTouches[0].clientX)>40) moveSlide(sx>e.changedTouches[0].clientX?1:-1); }, {passive:true});
 })();
 
 /* ─── SEARCH ─── */
-const searchInput=document.getElementById('searchInput');
-const suggBox=document.getElementById('suggBox');
-const searchClear=document.getElementById('searchClear');
+const searchInput = document.getElementById('searchInput');
+const suggBox     = document.getElementById('suggBox');
+const searchClear = document.getElementById('searchClear');
 
 if(searchInput){
-  searchInput.addEventListener('input',function(){
-    const val=this.value.trim().toLowerCase();
-    if(searchClear)searchClear.style.display=val?'block':'none';
-    if(!val){if(suggBox)suggBox.style.display='none';return;}
-    const dynamic=allProducts.map(p=>({name:p.name,cat:p.category}));
-    const results=[...STATIC_SEARCH,...dynamic].filter(i=>i.name.toLowerCase().includes(val)).slice(0,7);
-    if(!results.length){suggBox.style.display='none';return;}
-    suggBox.innerHTML=results.map(r=>{
-      const label=CATS.find(c=>c.key===r.cat)?.label||r.cat;
+  searchInput.addEventListener('input', function(){
+    const val = this.value.trim().toLowerCase();
+    if(searchClear) searchClear.style.display = val ? 'block' : 'none';
+    if(!val){ if(suggBox) suggBox.style.display = 'none'; return; }
+
+    // Category cards se seedha search — h3 naam + p description dono match karta hai
+    const cardResults = [];
+    document.querySelectorAll('.cat-card').forEach(card => {
+      const cat      = card.dataset.cat;
+      const h3       = card.querySelector('h3')?.textContent || '';
+      const desc     = card.querySelector('p')?.textContent  || '';
+      const combined = (h3 + ' ' + desc).toLowerCase();
+      if(combined.includes(val)){
+        cardResults.push({ name: h3, sub: desc, cat: cat });
+      }
+    });
+
+    // Google Sheets ke dynamic products bhi search karo
+    const dynamic = allProducts
+      .filter(p => p.name.toLowerCase().includes(val))
+      .map(p => ({ name: p.name, sub: '', cat: p.category }));
+
+    const results = [...cardResults, ...dynamic].slice(0, 7);
+
+    if(!results.length){ suggBox.style.display = 'none'; return; }
+
+    suggBox.innerHTML = results.map(r => {
+      const label = CATS.find(c=>c.key===r.cat)?.label || r.cat;
       return `<div class="sugg-item" onclick="goSearch('${r.cat}','${r.name}')">
-        <i class="fa-solid fa-magnifying-glass"></i><span>${r.name}</span>
-        <span class="sugg-cat">${label}</span></div>`;
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>${r.name}</span>
+        <span class="sugg-cat">${label}</span>
+      </div>`;
     }).join('');
-    suggBox.style.display='block';
+    suggBox.style.display = 'block';
   });
 }
 
-function goSearch(cat,name){
-  window.location.href='category.html?cat='+cat;
+/* ─── SEARCH → SCROLL TO CATEGORY CARD ─── */
+function goSearch(cat, name){
+  // Search band karo
+  if(searchInput) searchInput.value = '';
+  if(suggBox)     suggBox.style.display = 'none';
+  if(searchClear) searchClear.style.display = 'none';
+
+  // Us category ka card dhundo aur smooth scroll karo
+  const card = document.querySelector(`.cat-card[data-cat="${cat}"]`);
+  if(card){
+    const hh = document.querySelector('.header')?.offsetHeight || 0;
+    window.scrollTo({
+      top: card.getBoundingClientRect().top + window.scrollY - hh - 16,
+      behavior: 'smooth'
+    });
+    // Card highlight karo 1.5 sec ke liye
+    card.style.transition = 'box-shadow 0.3s ease, transform 0.3s ease';
+    card.style.boxShadow  = '0 0 0 3px var(--brown, #8b5e3c)';
+    card.style.transform  = 'scale(1.03)';
+    setTimeout(()=>{
+      card.style.boxShadow = '';
+      card.style.transform = '';
+    }, 1500);
+  }
 }
+
 function clearSearch(){
-  if(searchInput)searchInput.value='';
-  if(suggBox)suggBox.style.display='none';
-  if(searchClear)searchClear.style.display='none';
+  if(searchInput) searchInput.value = '';
+  if(suggBox)     suggBox.style.display = 'none';
+  if(searchClear) searchClear.style.display = 'none';
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap')&&suggBox)suggBox.style.display='none';});
+document.addEventListener('click', e=>{ if(!e.target.closest('.search-wrap')&&suggBox) suggBox.style.display='none'; });
 
 /* ─── PILLS ─── */
 document.querySelectorAll('.pill').forEach(p=>{
-  p.addEventListener('click',function(){
-    const cat=this.dataset.cat;
+  p.addEventListener('click', function(){
+    const cat = this.dataset.cat;
     if(cat==='all'){
       document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
       this.classList.add('active');
       document.querySelectorAll('.cat-card').forEach(c=>c.style.display='');
-      const sec=document.getElementById('catSection');
+      const sec = document.getElementById('catSection');
       if(sec){
-        const hh=document.querySelector('.header')?.offsetHeight||0;
-        window.scrollTo({top:sec.getBoundingClientRect().top+window.scrollY-hh-8,behavior:'smooth'});
+        const hh = document.querySelector('.header')?.offsetHeight || 0;
+        window.scrollTo({top: sec.getBoundingClientRect().top+window.scrollY-hh-8, behavior:'smooth'});
       }
     } else {
-      window.location.href='category.html?cat='+cat;
+      const link = CAT_LINKS[cat];
+      if(link){
+        window.open(link, '_blank');
+        // Same tab chahiye to yeh uncomment karo:
+        // window.location.href = link;
+      } else {
+        window.location.href = 'category.html?cat='+cat;
+      }
     }
   });
 });
@@ -269,31 +334,36 @@ function filterCat(cat){
   if(cat==='all'){
     document.querySelectorAll('.cat-card').forEach(c=>c.style.display='');
   } else {
-    window.location.href='category.html?cat='+cat;
+    const link = CAT_LINKS[cat];
+    if(link){
+      window.open(link, '_blank');
+    } else {
+      window.location.href = 'category.html?cat='+cat;
+    }
   }
 }
 
 /* ─── RENDER PRODUCTS ─── */
 function renderProducts(){
-  const featured=allProducts.filter(p=>p.featured===true||p.featured==='TRUE');
-  const grid=document.getElementById('prodGrid');
-  const noProd=document.getElementById('noProd');
-  if(!grid)return;
+  const featured = allProducts.filter(p=>p.featured===true||p.featured==='TRUE');
+  const grid     = document.getElementById('prodGrid');
+  const noProd   = document.getElementById('noProd');
+  if(!grid) return;
   grid.querySelectorAll('.prod-card').forEach(c=>c.remove());
   if(!featured.length){
-    if(noProd){noProd.style.display='block';noProd.innerHTML='<i class="fa-solid fa-box-open"></i><p>Products will appear here once added from the admin panel.</p>';}
+    if(noProd){ noProd.style.display='block'; noProd.innerHTML='<i class="fa-solid fa-box-open"></i><p>Products will appear here once added from the admin panel.</p>'; }
     return;
   }
-  if(noProd)noProd.style.display='none';
+  if(noProd) noProd.style.display='none';
   featured.forEach(p=>{
-    const disc=p.originalPrice&&p.price?Math.round((1-p.price/p.originalPrice)*100):0;
-    const safeName=(p.name||'').replace(/'/g,"\\'");
-    const safeImg=(p.image||'').replace(/'/g,"\\'");
-    const safeLink=(p.link||'').replace(/'/g,"\\'");
-    const waNum=localStorage.getItem('artisancraft_wa')||'919999999999';
-    const card=document.createElement('div');
-    card.className='prod-card';
-    card.innerHTML=`
+    const disc     = p.originalPrice&&p.price ? Math.round((1-p.price/p.originalPrice)*100) : 0;
+    const safeName = (p.name||'').replace(/'/g,"\\'");
+    const safeImg  = (p.image||'').replace(/'/g,"\\'");
+    const safeLink = (p.link||'').replace(/'/g,"\\'");
+    const waNum    = localStorage.getItem('artisancraft_wa') || '919999999999';
+    const card     = document.createElement('div');
+    card.className = 'prod-card';
+    card.innerHTML = `
       <div class="prod-img-wrap" ${p.link?`onclick="window.open('${safeLink}','_blank')" style="cursor:pointer"`:''}>
         <img src="${p.image||'https://placehold.co/260x320/e2d5c3/8b5e3c?text=Product&font=playfair'}"
              alt="${p.name}" loading="lazy"
@@ -315,72 +385,81 @@ function renderProducts(){
         </div>
       </div>`;
     grid.appendChild(card);
-    card.style.opacity='0';card.style.transform='translateY(22px)';
-    card.style.transition='opacity .45s ease, transform .45s ease';
+    card.style.opacity    = '0';
+    card.style.transform  = 'translateY(22px)';
+    card.style.transition = 'opacity .45s ease, transform .45s ease';
     revObs.observe(card);
   });
 }
 
 function handleProdATC(id,name,price,category,image,link,btn){
   addToCart(id,name,price,category,image,link);
-  btn.classList.add('added');btn.innerHTML='<i class="fa-solid fa-check"></i> Added!';
-  setTimeout(()=>{btn.classList.remove('added');btn.innerHTML='<i class="fa-solid fa-basket-shopping"></i> Add to Cart';},2000);
+  btn.classList.add('added');
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+  setTimeout(()=>{ btn.classList.remove('added'); btn.innerHTML='<i class="fa-solid fa-basket-shopping"></i> Add to Cart'; }, 2000);
 }
 
 /* ─── COUNTS ─── */
 function updateCounts(){
   CATS.forEach(c=>{
-    const n=allProducts.filter(p=>p.category===c.key).length;
+    const n = allProducts.filter(p=>p.category===c.key).length;
     document.querySelectorAll(`.ccount[data-key="${c.key}"]`).forEach(el=>{
-      el.textContent=n>0?`${n} design${n>1?'s':''}`:'';
+      el.textContent = n>0 ? `${n} design${n>1?'s':''}` : '';
     });
   });
 }
 
 /* ─── TOAST ─── */
 function showToast(msg){
-  let t=document.querySelector('.toast');
-  if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2200);
+  let t = document.querySelector('.toast');
+  if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
 /* ─── FLOATING CARE ─── */
 function toggleCare(){
-  const menu=document.getElementById('careMenu');
-  const btn=document.querySelector('.float-btn');
-  const ico=document.getElementById('floatIco');
-  const open=menu.classList.toggle('open');
-  btn.classList.toggle('open',open);
-  if(ico)ico.className=open?'fa-solid fa-xmark':'fa-solid fa-headset';
+  const menu = document.getElementById('careMenu');
+  const btn  = document.querySelector('.float-btn');
+  const ico  = document.getElementById('floatIco');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if(ico) ico.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-headset';
 }
-document.addEventListener('click',e=>{
+document.addEventListener('click', e=>{
   if(!e.target.closest('.float-wrap')){
-    const menu=document.getElementById('careMenu');
-    const btn=document.querySelector('.float-btn');
-    const ico=document.getElementById('floatIco');
-    if(menu)menu.classList.remove('open');
-    if(btn)btn.classList.remove('open');
-    if(ico)ico.className='fa-solid fa-headset';
+    const menu = document.getElementById('careMenu');
+    const btn  = document.querySelector('.float-btn');
+    const ico  = document.getElementById('floatIco');
+    if(menu) menu.classList.remove('open');
+    if(btn)  btn.classList.remove('open');
+    if(ico)  ico.className = 'fa-solid fa-headset';
   }
 });
 
 /* ─── SCROLL REVEAL ─── */
-const revObs=new IntersectionObserver(entries=>{
+const revObs = new IntersectionObserver(entries=>{
   entries.forEach(e=>{
-    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';revObs.unobserve(e.target);}
+    if(e.isIntersecting){
+      e.target.style.opacity   = '1';
+      e.target.style.transform = 'translateY(0)';
+      revObs.unobserve(e.target);
+    }
   });
-},{threshold:0.08});
+}, {threshold:0.08});
 
 document.querySelectorAll('.cat-card,.why-card,.nail-card,.vc-box').forEach(el=>{
-  el.style.opacity='0';el.style.transform='translateY(22px)';
-  el.style.transition='opacity .45s ease, transform .45s ease';
+  el.style.opacity    = '0';
+  el.style.transform  = 'translateY(22px)';
+  el.style.transition = 'opacity .45s ease, transform .45s ease';
   revObs.observe(el);
 });
 
 /* ─── CSS INJECT ─── */
-const s=document.createElement('style');
-s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+const s = document.createElement('style');
+s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(s);
 
 /* ─── INIT ─── */

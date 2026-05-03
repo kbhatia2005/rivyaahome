@@ -1,6 +1,3 @@
-/* ═══════════════════════════════════════════
-   GOOGLE SHEETS API
-═══════════════════════════════════════════ */
 const API_URL  = 'https://script.google.com/macros/s/AKfycbzKE_ISsqnLyQKrY9iIKEZpv5ikAorBh-FriIq23F99-HeU0FD3v6sVcM_yBChda661/exec';
 const CART_KEY = 'artisancraft_cart';
 
@@ -14,28 +11,35 @@ const CATS = [
 
 const STATIC_SEARCH = [
   {name:'Handcrafted Saree',cat:'sarees'},{name:'Hand Painted Saree',cat:'sarees'},
-  {name:'Wedding Saree',cat:'sarees'},{name:'Press-On Nails',cat:'nails'},
-  {name:'Bridal Nail Set',cat:'nails'},{name:'Custom Nail Art',cat:'nails'},
+  {name:'Press-On Nails',cat:'nails'},{name:'Bridal Nail Set',cat:'nails'},
   {name:'Hand Painted Shirt',cat:'shirts'},{name:'Handcrafted Shirt',cat:'shirts'},
-  {name:'Wall Hanging',cat:'wall'},{name:'Macramé Wall Art',cat:'wall'},
-  {name:'Wedding Hoops',cat:'jewellery'},{name:'Engagement Ring Platter',cat:'gifting'},
-  {name:'Hand Painted Hoodie',cat:'hoodies'},{name:'Handcrafted Suit',cat:'suits'},
-  {name:'Tote Bag',cat:'bags'},{name:'Hair Accessories',cat:'accessories'},
-  {name:'Hand Painted Pouch',cat:'accessories'},{name:'Bookmark',cat:'gifting'},
+  {name:'Wall Hanging',cat:'wall'},{name:'Wedding Hoops',cat:'jewellery'},
+  {name:'Engagement Ring Platter',cat:'gifting'},{name:'Hand Painted Hoodie',cat:'hoodies'},
+  {name:'Handcrafted Suit',cat:'suits'},{name:'Tote Bag',cat:'bags'},
+  {name:'Hair Accessories',cat:'accessories'},{name:'Bookmark',cat:'gifting'},
 ];
 
-/* ═══════════════════════════════════════════
-   FETCH PRODUCTS FROM GOOGLE SHEETS
-═══════════════════════════════════════════ */
+/* ─── JSONP FETCH (works on file:// and any hosting) ─── */
 let allProducts = [];
 
-async function fetchProducts() {
+function fetchProductsJSONP() {
   showLoading(true);
-  try {
-    const res  = await fetch(API_URL);
-    const data = await res.json();
-    if (data.success) {
-      allProducts = data.products.map(p => ({
+  const cbName = 'gsCallback_' + Date.now();
+  const script = document.createElement('script');
+  const timeout = setTimeout(() => {
+    showLoading(false);
+    showFetchError();
+    if (window[cbName]) delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }, 10000);
+
+  window[cbName] = function(data) {
+    clearTimeout(timeout);
+    showLoading(false);
+    if (script.parentNode) script.parentNode.removeChild(script);
+    delete window[cbName];
+    if (data && data.success) {
+      allProducts = (data.products || []).map(p => ({
         ...p,
         price:         Number(p.price) || 0,
         originalPrice: p.originalPrice ? Number(p.originalPrice) : null,
@@ -43,39 +47,43 @@ async function fetchProducts() {
       }));
       renderProducts();
       updateCounts();
+    } else {
+      showFetchError();
     }
-  } catch (err) {
-    console.error('Fetch error:', err);
-    const noProd = document.getElementById('noProd');
-    if (noProd) {
-      noProd.style.display = 'block';
-      noProd.innerHTML = '<i class="fa-solid fa-wifi" style="opacity:.3;font-size:36px;display:block;margin-bottom:10px"></i><p>Could not load products. Check your connection.</p>';
-    }
-  } finally {
-    showLoading(false);
-  }
+  };
+
+  script.src = API_URL + '?callback=' + cbName;
+  script.onerror = () => { clearTimeout(timeout); showLoading(false); showFetchError(); };
+  document.head.appendChild(script);
 }
 
 function showLoading(show) {
   const grid = document.getElementById('prodGrid');
   if (!grid) return;
-  const existing = document.getElementById('prodLoading');
+  const el = document.getElementById('prodLoading');
   if (show) {
-    if (existing) return;
     document.getElementById('noProd').style.display = 'none';
-    grid.insertAdjacentHTML('beforeend',
+    if (!el) grid.insertAdjacentHTML('beforeend',
       `<div id="prodLoading" style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--text-l)">
-        <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--brown);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>
+        <div style="width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--brown);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>
         <p style="font-size:13.5px">Loading products…</p>
       </div>`);
   } else {
-    if (existing) existing.remove();
+    if (el) el.remove();
   }
 }
 
-/* ═══════════════════════════════════════════
-   CART
-═══════════════════════════════════════════ */
+function showFetchError() {
+  const noProd = document.getElementById('noProd');
+  if (noProd) {
+    noProd.style.display = 'block';
+    noProd.innerHTML = `
+      <i class="fa-solid fa-triangle-exclamation" style="font-size:36px;opacity:.4;display:block;margin-bottom:10px"></i>
+      <p>Could not load products.<br/>Check your internet connection.</p>`;
+  }
+}
+
+/* ─── CART ─── */
 function getCart()      { try { return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); } catch { return []; } }
 function saveCart(cart) { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 
@@ -140,7 +148,7 @@ function renderCartItems() {
           <img src="${item.image||'https://placehold.co/60x60/e2d5c3/8b5e3c?text=P'}" alt="${item.name}"/>
         </div>
         <div class="cart-item-info">
-          <div class="cart-item-name" ${clickFn?`onclick="${clickFn}" style="cursor:pointer"`:''}">${item.name}</div>
+          <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-cat">${label}</div>
           <div class="cart-item-price">₹${(item.price*item.qty).toLocaleString('en-IN')}</div>
           <div class="cart-item-qty">
@@ -160,28 +168,27 @@ function renderCartItems() {
   if (totalEl) totalEl.textContent = '₹'+total.toLocaleString('en-IN');
 
   if (waBtn) {
-    const msg = 'Hi! I want to place an order:\n\n'
+    const waNum = localStorage.getItem('artisancraft_wa') || '919999999999';
+    const msg   = 'Hi! I want to place an order:\n\n'
       + cart.map(i=>`• ${i.name} x${i.qty} — ₹${i.price}`).join('\n')
       + `\n\nTotal: ₹${total.toLocaleString('en-IN')}`;
-    waBtn.href = `https://wa.me/916239446372?text=${encodeURIComponent(msg)}`;
+    waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`;
   }
 }
 
 function openCart()  { document.getElementById('cartDrawer').classList.add('open');  document.getElementById('cartOverlay').classList.add('open');  renderCartItems(); }
 function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
 
-/* ═══════════════════════════════════════════
-   HERO SLIDER
-═══════════════════════════════════════════ */
-let curSlide   = 0;
-const slidesWrap  = document.getElementById('slidesWrap');
-const dotsWrap    = document.getElementById('dots');
-const totalSlides = slidesWrap ? slidesWrap.querySelectorAll('.slide').length : 0;
+/* ─── HERO SLIDER ─── */
+let curSlide=0;
+const slidesWrap=document.getElementById('slidesWrap');
+const dotsWrap=document.getElementById('dots');
+const totalSlides=slidesWrap?slidesWrap.querySelectorAll('.slide').length:0;
 let autoTimer;
 
-(function buildDots() {
-  if (!dotsWrap) return;
-  for (let i=0;i<totalSlides;i++) {
+(function buildDots(){
+  if(!dotsWrap)return;
+  for(let i=0;i<totalSlides;i++){
     const d=document.createElement('button');
     d.className='dot'+(i===0?' active':'');
     d.onclick=()=>{goSlide(i);resetAuto();};
@@ -189,39 +196,37 @@ let autoTimer;
   }
 })();
 
-function goSlide(n) {
+function goSlide(n){
   curSlide=((n%totalSlides)+totalSlides)%totalSlides;
-  if (slidesWrap) slidesWrap.style.transform=`translateX(-${curSlide*100}%)`;
+  if(slidesWrap)slidesWrap.style.transform=`translateX(-${curSlide*100}%)`;
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===curSlide));
 }
-function moveSlide(dir) { goSlide(curSlide+dir); resetAuto(); }
-function resetAuto() { clearInterval(autoTimer); autoTimer=setInterval(()=>goSlide(curSlide+1),4500); }
+function moveSlide(dir){goSlide(curSlide+dir);resetAuto();}
+function resetAuto(){clearInterval(autoTimer);autoTimer=setInterval(()=>goSlide(curSlide+1),4500);}
 resetAuto();
 
 (function(){
   const hero=document.querySelector('.hero');
-  if(!hero) return;
+  if(!hero)return;
   let sx=0;
   hero.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
   hero.addEventListener('touchend',e=>{if(Math.abs(sx-e.changedTouches[0].clientX)>40)moveSlide(sx>e.changedTouches[0].clientX?1:-1);},{passive:true});
 })();
 
-/* ═══════════════════════════════════════════
-   SEARCH
-═══════════════════════════════════════════ */
-const searchInput = document.getElementById('searchInput');
-const suggBox     = document.getElementById('suggBox');
-const searchClear = document.getElementById('searchClear');
+/* ─── SEARCH ─── */
+const searchInput=document.getElementById('searchInput');
+const suggBox=document.getElementById('suggBox');
+const searchClear=document.getElementById('searchClear');
 
-if (searchInput) {
-  searchInput.addEventListener('input', function() {
-    const val = this.value.trim().toLowerCase();
-    if (searchClear) searchClear.style.display = val?'block':'none';
-    if (!val) { if(suggBox) suggBox.style.display='none'; return; }
-    const dynamic  = allProducts.map(p=>({name:p.name,cat:p.category}));
-    const results  = [...STATIC_SEARCH,...dynamic].filter(i=>i.name.toLowerCase().includes(val)).slice(0,7);
-    if (!results.length) { suggBox.style.display='none'; return; }
-    suggBox.innerHTML = results.map(r=>{
+if(searchInput){
+  searchInput.addEventListener('input',function(){
+    const val=this.value.trim().toLowerCase();
+    if(searchClear)searchClear.style.display=val?'block':'none';
+    if(!val){if(suggBox)suggBox.style.display='none';return;}
+    const dynamic=allProducts.map(p=>({name:p.name,cat:p.category}));
+    const results=[...STATIC_SEARCH,...dynamic].filter(i=>i.name.toLowerCase().includes(val)).slice(0,7);
+    if(!results.length){suggBox.style.display='none';return;}
+    suggBox.innerHTML=results.map(r=>{
       const label=CATS.find(c=>c.key===r.cat)?.label||r.cat;
       return `<div class="sugg-item" onclick="goSearch('${r.cat}','${r.name}')">
         <i class="fa-solid fa-magnifying-glass"></i><span>${r.name}</span>
@@ -231,108 +236,99 @@ if (searchInput) {
   });
 }
 
-function goSearch(cat,name) {
-  if(suggBox) suggBox.style.display='none';
-  if(searchInput) searchInput.value=name;
-  const sec=document.getElementById('catSection');
-  if(sec){sec.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>filterCat(cat),400);}
+function goSearch(cat,name){
+  window.location.href='category.html?cat='+cat;
 }
-function clearSearch() {
-  if(searchInput) searchInput.value='';
-  if(suggBox) suggBox.style.display='none';
-  if(searchClear) searchClear.style.display='none';
+function clearSearch(){
+  if(searchInput)searchInput.value='';
+  if(suggBox)suggBox.style.display='none';
+  if(searchClear)searchClear.style.display='none';
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap')&&suggBox)suggBox.style.display='none';});
 
-/* ═══════════════════════════════════════════
-   PILLS & FILTER
-═══════════════════════════════════════════ */
+/* ─── PILLS ─── */
 document.querySelectorAll('.pill').forEach(p=>{
   p.addEventListener('click',function(){
-    document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
-    this.classList.add('active');
-    filterCat(this.dataset.cat);
+    const cat=this.dataset.cat;
+    if(cat==='all'){
+      document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.cat-card').forEach(c=>c.style.display='');
+      const sec=document.getElementById('catSection');
+      if(sec){
+        const hh=document.querySelector('.header')?.offsetHeight||0;
+        window.scrollTo({top:sec.getBoundingClientRect().top+window.scrollY-hh-8,behavior:'smooth'});
+      }
+    } else {
+      window.location.href='category.html?cat='+cat;
+    }
   });
 });
-function filterCat(cat) {
-  document.querySelectorAll('.cat-card').forEach(card => {
-    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
-  });
-  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.cat === cat));
 
-  // Scroll to category section
-  const section = document.getElementById('catSection');
-  if (section) {
-    const headerH = document.querySelector('.header')?.offsetHeight || 0;
-    const top = section.getBoundingClientRect().top + window.scrollY - headerH - 12;
-    window.scrollTo({ top, behavior: 'smooth' });
+function filterCat(cat){
+  if(cat==='all'){
+    document.querySelectorAll('.cat-card').forEach(c=>c.style.display='');
+  } else {
+    window.location.href='category.html?cat='+cat;
   }
 }
-/* ═══════════════════════════════════════════
-   RENDER PRODUCTS
-═══════════════════════════════════════════ */
-function renderProducts() {
-  const featured = allProducts.filter(p=>p.featured===true||p.featured==='TRUE');
-  const grid     = document.getElementById('prodGrid');
-  const noProd   = document.getElementById('noProd');
-  if (!grid) return;
 
+/* ─── RENDER PRODUCTS ─── */
+function renderProducts(){
+  const featured=allProducts.filter(p=>p.featured===true||p.featured==='TRUE');
+  const grid=document.getElementById('prodGrid');
+  const noProd=document.getElementById('noProd');
+  if(!grid)return;
   grid.querySelectorAll('.prod-card').forEach(c=>c.remove());
-
-  if (!featured.length) {
-    if (noProd) {
-      noProd.style.display='block';
-      noProd.innerHTML='<i class="fa-solid fa-box-open"></i><p>Products will appear here once added from the admin panel.</p>';
-    }
+  if(!featured.length){
+    if(noProd){noProd.style.display='block';noProd.innerHTML='<i class="fa-solid fa-box-open"></i><p>Products will appear here once added from the admin panel.</p>';}
     return;
   }
-  if (noProd) noProd.style.display='none';
-
+  if(noProd)noProd.style.display='none';
   featured.forEach(p=>{
-    const disc = p.originalPrice&&p.price ? Math.round((1-p.price/p.originalPrice)*100) : 0;
-    const safeName = p.name.replace(/'/g,"\\'");
-    const card = document.createElement('div');
+    const disc=p.originalPrice&&p.price?Math.round((1-p.price/p.originalPrice)*100):0;
+    const safeName=(p.name||'').replace(/'/g,"\\'");
+    const safeImg=(p.image||'').replace(/'/g,"\\'");
+    const safeLink=(p.link||'').replace(/'/g,"\\'");
+    const waNum=localStorage.getItem('artisancraft_wa')||'919999999999';
+    const card=document.createElement('div');
     card.className='prod-card';
     card.innerHTML=`
-      <div class="prod-img-wrap" ${p.link?`onclick="window.open('${p.link}','_blank')" style="cursor:pointer"`:''}>
+      <div class="prod-img-wrap" ${p.link?`onclick="window.open('${safeLink}','_blank')" style="cursor:pointer"`:''}>
         <img src="${p.image||'https://placehold.co/260x320/e2d5c3/8b5e3c?text=Product&font=playfair'}"
              alt="${p.name}" loading="lazy"
              onerror="this.src='https://placehold.co/260x320/e2d5c3/8b5e3c?text=Product'"/>
         ${disc>0?`<span class="prod-disc">${disc}% OFF</span>`:''}
       </div>
       <div class="prod-body">
-        <div class="prod-name" ${p.link?`onclick="window.open('${p.link}','_blank')" style="cursor:pointer"`:''}">${p.name}</div>
+        <div class="prod-name">${p.name}</div>
         <div class="prod-prices">
           ${p.originalPrice?`<s>₹${Number(p.originalPrice).toLocaleString('en-IN')}</s>`:''}
           <strong>₹${Number(p.price).toLocaleString('en-IN')}</strong>
         </div>
         <div class="prod-btns">
-          <button class="prod-atc"
-            onclick="handleProdATC('${p.id}','${safeName}','${p.price}','${p.category}','${p.image||''}','${p.link||''}',this)">
+          <button class="prod-atc" onclick="handleProdATC('${p.id}','${safeName}','${p.price}','${p.category}','${safeImg}','${safeLink}',this)">
             <i class="fa-solid fa-basket-shopping"></i> Add to Cart
           </button>
-          <a href="https://wa.me/916239446372?text=Hi!+I+want+to+order+${encodeURIComponent(p.name)}"
+          <a href="https://wa.me/${waNum}?text=Hi!+I+want+to+order+${encodeURIComponent(p.name)}"
              target="_blank" class="prod-wa-sm"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>`;
     grid.appendChild(card);
-    card.style.opacity='0'; card.style.transform='translateY(22px)';
+    card.style.opacity='0';card.style.transform='translateY(22px)';
     card.style.transition='opacity .45s ease, transform .45s ease';
     revObs.observe(card);
   });
 }
 
-function handleProdATC(id,name,price,category,image,link,btn) {
+function handleProdATC(id,name,price,category,image,link,btn){
   addToCart(id,name,price,category,image,link);
-  btn.classList.add('added');
-  btn.innerHTML='<i class="fa-solid fa-check"></i> Added!';
+  btn.classList.add('added');btn.innerHTML='<i class="fa-solid fa-check"></i> Added!';
   setTimeout(()=>{btn.classList.remove('added');btn.innerHTML='<i class="fa-solid fa-basket-shopping"></i> Add to Cart';},2000);
 }
 
-/* ═══════════════════════════════════════════
-   CATEGORY COUNTS
-═══════════════════════════════════════════ */
-function updateCounts() {
+/* ─── COUNTS ─── */
+function updateCounts(){
   CATS.forEach(c=>{
     const n=allProducts.filter(p=>p.category===c.key).length;
     document.querySelectorAll(`.ccount[data-key="${c.key}"]`).forEach(el=>{
@@ -341,26 +337,22 @@ function updateCounts() {
   });
 }
 
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
-function showToast(msg) {
+/* ─── TOAST ─── */
+function showToast(msg){
   let t=document.querySelector('.toast');
   if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2200);
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-/* ═══════════════════════════════════════════
-   FLOATING CARE
-═══════════════════════════════════════════ */
-function toggleCare() {
+/* ─── FLOATING CARE ─── */
+function toggleCare(){
   const menu=document.getElementById('careMenu');
   const btn=document.querySelector('.float-btn');
   const ico=document.getElementById('floatIco');
   const open=menu.classList.toggle('open');
   btn.classList.toggle('open',open);
-  if(ico) ico.className=open?'fa-solid fa-xmark':'fa-solid fa-headset';
+  if(ico)ico.className=open?'fa-solid fa-xmark':'fa-solid fa-headset';
 }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.float-wrap')){
@@ -373,32 +365,24 @@ document.addEventListener('click',e=>{
   }
 });
 
-/* ═══════════════════════════════════════════
-   SCROLL REVEAL
-═══════════════════════════════════════════ */
+/* ─── SCROLL REVEAL ─── */
 const revObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.style.opacity='1';
-      e.target.style.transform='translateY(0)';
-      revObs.unobserve(e.target);
-    }
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';revObs.unobserve(e.target);}
   });
 },{threshold:0.08});
 
 document.querySelectorAll('.cat-card,.why-card,.nail-card,.vc-box').forEach(el=>{
-  el.style.opacity='0'; el.style.transform='translateY(22px)';
+  el.style.opacity='0';el.style.transform='translateY(22px)';
   el.style.transition='opacity .45s ease, transform .45s ease';
   revObs.observe(el);
 });
 
-/* CSS spin animation inject */
-const style=document.createElement('style');
-style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
-document.head.appendChild(style);
+/* ─── CSS INJECT ─── */
+const s=document.createElement('style');
+s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(s);
 
-/* ═══════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════ */
+/* ─── INIT ─── */
 updateCartBadge();
-fetchProducts();
+fetchProductsJSONP();

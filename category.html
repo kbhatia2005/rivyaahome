@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>Category – ArtisanCraft</title>
+  <link rel="stylesheet" href="category.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ANNOUNCE BAR -->
+<div class="announce-bar">
+  <div class="ticker-track">
+    <span>✦ Free Shipping Over ₹999</span>
+    <span>✦ COD Available Pan India</span>
+    <span>✦ 100% Handcrafted</span>
+    <span>✦ Easy 7-Day Returns</span>
+    <span>✦ Custom Orders Welcome</span>
+    <span>✦ Free Shipping Over ₹999</span>
+    <span>✦ COD Available Pan India</span>
+    <span>✦ 100% Handcrafted</span>
+    <span>✦ Easy 7-Day Returns</span>
+    <span>✦ Custom Orders Welcome</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="hdr-top">
+    <a href="index.html" class="logo">ARTISAN<em>craft</em></a>
+    <div class="hdr-actions">
+      <a href="https://wa.me/919999999999?text=Hi!+I+want+to+customise+a+product" target="_blank" class="wa-btn">
+        <i class="fa-brands fa-whatsapp"></i> Customise
+      </a>
+      <button class="cart-btn" onclick="openCart()">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+  <!-- breadcrumb -->
+  <div class="breadcrumb">
+    <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+    <span>/</span>
+    <span id="breadCat">Category</span>
+  </div>
+</header>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-hdr">
+    <h3><i class="fa-solid fa-basket-shopping"></i> Your Cart</h3>
+    <button onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot" id="cartFoot" style="display:none">
+    <div class="cart-total">Total: <strong id="cartTotal">₹0</strong></div>
+    <a href="#" class="cart-wa-btn" id="cartWaBtn" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i> Order via WhatsApp
+    </a>
+    <button class="cart-buy-btn" onclick="buyNowAll()">
+      <i class="fa-solid fa-bolt"></i> Buy Now
+    </button>
+  </div>
+</div>
+
+<!-- CATEGORY HERO -->
+<section class="cat-hero" id="catHero">
+  <div class="cat-hero-txt">
+    <span class="cat-tag" id="catTag">Collection</span>
+    <h1 id="catTitle">Loading…</h1>
+    <p id="catDesc">Handcrafted with love, made for you.</p>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-left">
+    <span class="prod-count" id="prodCount">0 products</span>
+  </div>
+  <div class="filter-right">
+    <select id="sortSelect" onchange="sortProducts()">
+      <option value="default">Sort: Default</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+      <option value="discount">Most Discount</option>
+    </select>
+  </div>
+</div>
+
+<!-- PRODUCTS LIST -->
+<main class="prod-list" id="prodList">
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <p>Loading products…</p>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <i class="fa-solid fa-box-open"></i>
+    <p>No products in this category yet.</p>
+    <a href="index.html" class="back-btn">← Back to Home</a>
+  </div>
+</main>
+
+<!-- IMAGE VIEWER MODAL -->
+<div class="img-modal" id="imgModal" onclick="closeImgModal(event)">
+  <div class="img-modal-box">
+    <button class="img-modal-close" onclick="closeImgModal()"><i class="fa-solid fa-xmark"></i></button>
+    <img id="imgModalImg" src="" alt="Product"/>
+    <p id="imgModalName"></p>
+  </div>
+</div>
+
+<!-- REVIEWS SECTION -->
+<section class="reviews-sec">
+  <h2 class="sec-h">What Our Customers Say</h2>
+  <div class="reviews-wrap">
+    <div class="review-card">
+      <div class="rev-top">
+        <div class="rev-avatar">P</div>
+        <div>
+          <strong>Priya M.</strong>
+          <span class="rev-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+        </div>
+        <span class="rev-stars">★★★★★</span>
+      </div>
+      <p class="rev-date">12 April 2025</p>
+      <p class="rev-text">Absolutely stunning quality! The packaging was gorgeous and the product exceeded all expectations. Will definitely order again!</p>
+    </div>
+    <div class="review-card">
+      <div class="rev-top">
+        <div class="rev-avatar" style="background:var(--brown)">A</div>
+        <div>
+          <strong>Ananya S.</strong>
+          <span class="rev-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+        </div>
+        <span class="rev-stars">★★★★★</span>
+      </div>
+      <p class="rev-date">3 March 2025</p>
+      <p class="rev-text">Beautiful handmade piece. Super lightweight and perfect for daily wear. Got so many compliments!</p>
+    </div>
+    <div class="review-card">
+      <div class="rev-top">
+        <div class="rev-avatar" style="background:var(--gold-d)">R</div>
+        <div>
+          <strong>Ritu K.</strong>
+          <span class="rev-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+        </div>
+        <span class="rev-stars">★★★★★</span>
+      </div>
+      <p class="rev-date">18 Feb 2025</p>
+      <p class="rev-text">Got it customised via WhatsApp — the team was super responsive and the result was exactly as I imagined. 10/10!</p>
+    </div>
+    <div class="review-card">
+      <div class="rev-top">
+        <div class="rev-avatar" style="background:#5a2a8a">S</div>
+        <div>
+          <strong>Sneha T.</strong>
+          <span class="rev-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+        </div>
+        <span class="rev-stars">★★★★★</span>
+      </div>
+      <p class="rev-date">5 Jan 2025</p>
+      <p class="rev-text">Ordered as a wedding gift — everyone loved it! The quality is premium and delivery was faster than expected.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="f-top">
+    <div class="f-brand">
+      <div class="f-logo">ARTISAN<em>craft</em></div>
+      <p>Celebrating handcrafted wearables, decor &amp; gifts — made with love in India.</p>
+      <div class="soc">
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://wa.me/919999999999"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div class="f-col"><h4>Information</h4><a href="#">About Us</a><a href="#">Our Story</a><a href="#">Blog</a></div>
+    <div class="f-col"><h4>Customer Care</h4><a href="#">Track Order</a><a href="#">Return Policy</a><a href="#">FAQs</a></div>
+    <div class="f-col f-contact">
+      <h4>Contact Us</h4>
+      <p><i class="fa-solid fa-envelope"></i> support@artisancraft.in</p>
+      <p><i class="fa-brands fa-whatsapp"></i> +91 99999 99999</p>
+      <p><i class="fa-solid fa-clock"></i> Mon–Sat 10AM–7PM</p>
+    </div>
+  </div>
+  <div class="f-bot"><p>© 2025 ArtisanCraft. All rights reserved. Made with ♥ in India.</p></div>
+</footer>
+
+<!-- FLOATING CARE -->
+<div class="float-wrap">
+  <div class="care-menu" id="careMenu">
+    <a href="https://wa.me/919999999999" target="_blank" class="cm-item wa"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></a>
+    <a href="tel:+919999999999" class="cm-item call"><i class="fa-solid fa-phone"></i><span>Call</span></a>
+    <a href="mailto:support@artisancraft.in" class="cm-item mail"><i class="fa-solid fa-envelope"></i><span>Email</span></a>
+  </div>
+  <button class="float-btn" onclick="toggleCare()"><i class="fa-solid fa-headset" id="floatIco"></i></button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="category.js"></script>
+</body>
+</html>
